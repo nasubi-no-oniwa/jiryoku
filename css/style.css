@@ -385,7 +385,7 @@ body { background: radial-gradient(circle at 50% 30%, #2a221c, #0f0c0a 70%); }
 .jc-stamp.ghost { background: rgba(210,48,31,.14); color: #a8281c; box-shadow: inset 0 0 0 2px rgba(210,48,31,.5); } .jc-stamp.ghost i { visibility: hidden; }
 .jc-tot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; padding-left: 8px; }
 .jc-tot small { font-weight: 800; color: #5a4a35; font-size: 13px; }
-.jc-tot b { font-family: 'Dela Gothic One'; font-weight: 400; font-size: 62px; line-height: 1.05; color: #8a7860; transform-origin: left center; -webkit-text-stroke: 2px #3a2e22; paint-order: stroke fill; }
+.jc-tot b { font-family: 'Dela Gothic One'; font-weight: 400; font-size: clamp(38px, 12.5vw, 62px); line-height: 1.05; color: #8a7860; transform-origin: left center; -webkit-text-stroke: 2px #3a2e22; paint-order: stroke fill; }
 #jcard[data-g="gold"] .jc-tot b { color: #f0b820; -webkit-text-stroke-color: #8a5a00; text-shadow: 0 0 18px rgba(255,190,40,.7); }
 #jcard[data-g="silver"] .jc-tot b { color: #c9d2dc; -webkit-text-stroke-color: #5b6470; text-shadow: 0 0 14px rgba(200,215,230,.8); }
 #jcard[data-g="bronze"] .jc-tot b { color: #d98a48; -webkit-text-stroke-color: #6a3410; }
