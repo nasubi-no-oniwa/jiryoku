@@ -278,7 +278,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
   }
   OK.startBattle = startBattle;
   let callT = null;
-  function call(t, sec) { const c = $('call'); c.innerHTML = t; c.classList.add('on'); clearTimeout(callT); if (sec) callT = setTimeout(() => c.classList.remove('on'), sec * 1000); }
+  function call(t, sec) { const c = $('call'); c.innerHTML = t; c.classList.add('on'); if (OK.FX) OK.FX.call(c); clearTimeout(callT); if (sec) callT = setTimeout(() => c.classList.remove('on'), sec * 1000); }
   function liveStep(dt) {
     const m = st.live; if (!m) return;
     st.liveT += dt; if (st.liveT < 0) return;
@@ -290,14 +290,14 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     while (st.acc >= OK.DT && !m.over && n < 40) {
       m.tick(); st.acc -= OK.DT; n++;
       for (const e of m.ev) {
-        if (e.k === 'hit') { R.hit(e); const br = e.br[0] + e.br[1]; S().play(br > 0.4 ? 'break' : br > 0 ? 'crack' : 'hit', Math.min(1, e.v / 14)); }
+        if (e.k === 'hit') { R.hit(e); if (OK.FX && st.speed <= 2) OK.FX.hit(e); const br = e.br[0] + e.br[1]; S().play(br > 0.4 ? 'break' : br > 0 ? 'crack' : 'hit', Math.min(1, e.v / 14)); }
         else if (e.k === 'wall') S().play('wall', Math.min(1, e.v / 10));
       }
       m.ev.length = 0;
     }
     if (m.over && !st.done) { st.done = true; setTimeout(finish, 900); }
   }
-  const nm = w => '「' + w.ch + '」' + (w.orig ? '（元の字）' : '');
+  const nm = w => OK.workName(w);
   function finish() {
     const r = st.result, w0 = st.slots[0].w, w1 = st.slots[1].w;
     let t, line;
@@ -306,7 +306,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     const tags = OK.resultTags(r, w0, w1);
     const gk = tags.some(x => x.t === '下剋上！');
     call((gk ? '下剋上！\n' : '') + t + (r.endBy === 'time' ? '<small>時間切れ・残りの多さで勝負</small>' : ''), gk ? 2.2 : 1.6);
-    S().play(r.winner < 0 ? 'draw' : 'win');
+    S().play(r.winner < 0 ? 'draw' : 'win'); if (OK.FX) OK.FX.finish(r.winner);
     setTimeout(() => {
       $('res-t').innerHTML = (gk ? '<span class="gk">下剋上</span><br>' : '') + esc(t); $('res-line').textContent = line + (r.endBy === 'time' ? '（時間切れ判定）' : '');
       prepareImage(line, tags);
@@ -314,7 +314,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
       $('btn-chal-next').hidden = !st.chal; $('btn-remake').hidden = st.mode !== 'local';
       if (st.chal) { $('res-line').textContent = line + '　…成績をつけています'; OK.Chal.onResult(r.winner).then(x => { if (x) $('res-line').textContent = x; }); }
       $('btn-change').textContent = st.mode === 'local' ? (st.chal ? '自分の作品を変える' : '組み合わせを変える') : (st.mode === 'watch' ? 'もどる' : 'もう一戦（えらびなおす）');
-      $('result').classList.add('on');
+      $('result').classList.add('on'); if (OK.FX) OK.FX.result();
     }, 1500);
   }
   function prepareImage(line, tags) {

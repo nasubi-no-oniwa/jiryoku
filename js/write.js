@@ -98,7 +98,7 @@
   }
   function up(ev) {
     if (ev.pointerId !== pid) return; pid = null;
-    if (st.cur) { const c = st.cur; const t = Math.round(performance.now() - st.t0); if (c[c.length - 1] !== t) c.push(c[c.length - 3], c[c.length - 2], t); st.strokes.push(c); st.cur = null; OK.S && OK.S.play && OK.S.play('place'); }
+    if (st.cur) { const c = st.cur; const t = Math.round(performance.now() - st.t0); if (c[c.length - 1] !== t) c.push(c[c.length - 3], c[c.length - 2], t); st.strokes.push(c); st.cur = null; OK.S && OK.S.play && OK.S.play('place'); if (OK.FX && ev.clientX != null) OK.FX.stroke(ev.clientX, ev.clientY); }
     if (st.strokes.length > 60) st.strokes.length = 60;
     draw(); upd();
   }
@@ -115,18 +115,29 @@
   const NA = ['墨', '筆', '硯', '雅', '翠', '月', '風', '雲', '石', '竹', '松', '梅', '鶴', '龍', '虎', '桜'], NB = ['舟', '庵', '堂', '斎', '山', '水', '亭', '園', '仙', '泉'];
   E.autoName = () => NA[Math.floor(Math.random() * NA.length)] + NB[Math.floor(Math.random() * NB.length)];
   function showCard(w) {
-    $('jc-rep').textContent = w.j.rep.toFixed(1) + '%';
-    $('jc-pow').textContent = '素質の ' + Math.round(w.jr.k * 100) + '% を出せる・総合パワー ' + SH.total(w.st);
-    const c = $('jc-shape').getContext('2d'); c.clearRect(0, 0, 300, 300); OK.R.shapeIcon(c, w.b.parts, 150, 150, 240, 0, 0, { lw: 3 });
-    const rv = $('jc-radar').getContext('2d'); rv.clearRect(0, 0, 300, 270); rv.save(); rv.scale(2, 2); OK.R.radar(rv, 75, 70, 48, OK.STATS.map(x => w.base[x.k]), null, { fs: 10, fill: 'rgba(90,80,70,.15)', stroke: 'rgba(60,40,20,.35)' }); OK.R.radar(rv, 75, 70, 48, OK.STATS.map(x => w.st[x.k]), null, { fs: 10, labels: false, fill: 'rgba(217,69,46,.45)', stroke: 'rgba(122,26,16,.9)' }); rv.restore();
-    $('jc-stl').innerHTML = OK.STATS.map(x => { const a = w.base[x.k], b = w.st[x.k], d = b - a; return `<div><b>${x.n}</b><b>${b}<small class="${d >= 0 ? 'up' : 'dn'}"> ${d >= 0 ? '+' : ''}${d}</small></b></div>`; }).join('') + `<div class="tot"><b>総合パワー</b><b>${SH.total(w.st)}<small> ／素質${SH.total(w.base)}</small></b></div>`;
+    const tot = SH.total(w.st), gr = OK.grade(tot);
+    $('jc-title').textContent = OK.repTitle(w);
+    $('jc-stamp').classList.toggle('kumi', !w.hw);
+    $('jc-pow').textContent = w.hw ? '素質の ' + Math.round(w.jr.k * 100) + '% を出せた' : '';
+    $('jc-grade').textContent = gr.n + 'の格'; $('jcard').dataset.g = gr.k;
+    // 半紙に書いた字
+    const c = $('jc-shape').getContext('2d'), Z = 360; c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, Z, Z);
+    c.fillStyle = '#f7f1e2'; c.fillRect(0, 0, Z, Z);
+    c.strokeStyle = 'rgba(200,52,30,.45)'; c.lineWidth = 2; c.setLineDash([9, 7]); c.beginPath(); c.moveTo(Z / 2, 0); c.lineTo(Z / 2, Z); c.moveTo(0, Z / 2); c.lineTo(Z, Z / 2); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = 'rgba(200,52,30,.7)'; c.lineWidth = 5; c.strokeRect(2.5, 2.5, Z - 5, Z - 5);
+    c.strokeStyle = '#17120e'; c.fillStyle = '#17120e'; c.lineCap = 'round'; c.lineJoin = 'round';
+    if (w.hw) w.strokes.forEach((s, i) => E.ink(c, s, w.rad[i], Z / 1000, 0, 0)); else OK.R.shapeIcon(c, w.b.parts, Z / 2, Z / 2, Z * 0.8, 0, 0, { fill: '#17120e', stroke: '#000', lw: 2 });
+    const rv = $('jc-radar').getContext('2d'); rv.clearRect(0, 0, 300, 270); rv.save(); rv.scale(2, 2);
+    OK.R.radar(rv, 75, 70, 48, OK.STATS.map(x => w.base[x.k]), null, { fs: 10, fill: 'rgba(90,80,70,.15)', stroke: 'rgba(60,40,20,.35)' }); OK.R.radar(rv, 75, 70, 48, OK.STATS.map(x => w.st[x.k]), null, { fs: 10, labels: false, fill: 'rgba(217,69,46,.45)', stroke: 'rgba(122,26,16,.9)' }); rv.restore();
+    $('jc-stl').innerHTML = OK.STATS.map(x => { const a = w.base[x.k], b = w.st[x.k], d = b - a; return `<div><b>${x.n}</b><b>${b}<small class="${d >= 0 ? 'up' : 'dn'}"> ${d >= 0 ? '+' : ''}${d}</small></b></div>`; }).join('');
     const j = w.j, why = w.jr.why.slice();
     why.unshift(`画数：${j.nu}画（手本${j.nr}画）${j.order === true ? '・書き順○' : j.order === false ? '・書き順×' : ''}`);
     $('jc-why').innerHTML = why.map(t => `<li>${esc(t)}</li>`).join('');
     try { $('jc-name').value = localStorage.getItem('jr_name') || ''; } catch (e) {}
     $('jcard').classList.add('on');
+    if (OK.FX) OK.FX.card(w, { rep: w.j.rep, tot, gold: gr.k === 'gold' || gr.k === 'silver' }); else { $('jc-rep').textContent = w.j.rep.toFixed(1) + '%'; $('jc-total').textContent = tot; }
   }
-  function closeCard() { $('jcard').classList.remove('on'); }
+  function closeCard() { if (OK.FX) OK.FX.cardSkip(); $('jcard').classList.remove('on'); }
 
   // ---------- ボタン ----------
   function bind() {

@@ -374,12 +374,24 @@ body { background: radial-gradient(circle at 50% 30%, #2a221c, #0f0c0a 70%); }
 .wr-hint { color: #bfae90; text-align: center; margin: 0; }
 /* 字力カード */
 .jc { padding: 14px; gap: 10px; overflow-y: auto; }
-.jc-top { display: flex; align-items: center; gap: 12px; }
-.jc-top canvas { width: 130px; height: 130px; background: #f7f1e3; border-radius: 10px; box-shadow: inset 0 0 0 2px rgba(60,40,20,.15); }
-.jc-rep { display: flex; flex-direction: column; }
-.jc-rep small { font-weight: 800; color: #7a6a55; }
-.jc-rep b { font-family: 'Dela Gothic One'; font-size: 44px; color: var(--red-d); line-height: 1.1; }
-.jc-rep span { font-weight: 800; font-size: 13px; color: #5a4a35; }
+.jc-top { display: flex; align-items: center; gap: 14px; }
+.jc-paper { position: relative; flex: 0 0 auto; width: 150px; height: 150px; }
+.jc-paper canvas { width: 150px; height: 150px; display: block; border-radius: 4px; box-shadow: 0 5px 12px rgba(0,0,0,.28); transform: rotate(-2deg); }
+.jc-stamp { position: absolute; right: -16px; bottom: -14px; width: 82px; height: 82px; border-radius: 50%; background: #d2301f; color: #fbeedb; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-9deg); box-shadow: 0 4px 10px rgba(0,0,0,.35), inset 0 0 0 3px #d2301f, inset 0 0 0 5px #fbeedb; line-height: 1.05; }
+.jc-stamp small { font-size: 9px; font-weight: 800; }
+.jc-stamp b { font-family: 'Dela Gothic One'; font-size: 17px; font-weight: 400; }
+.jc-stamp i { font-family: 'Yuji Syuku', serif; font-style: normal; font-size: 17px; }
+.jc-stamp.kumi small, .jc-stamp.kumi b { display: none; } .jc-stamp.kumi i { font-size: 19px; width: 2.2em; text-align: center; line-height: 1.15; }
+.jc-stamp.ghost { background: rgba(210,48,31,.14); color: #a8281c; box-shadow: inset 0 0 0 2px rgba(210,48,31,.5); } .jc-stamp.ghost i { visibility: hidden; }
+.jc-tot { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; padding-left: 8px; }
+.jc-tot small { font-weight: 800; color: #5a4a35; font-size: 13px; }
+.jc-tot b { font-family: 'Dela Gothic One'; font-weight: 400; font-size: 62px; line-height: 1.05; color: #8a7860; transform-origin: left center; -webkit-text-stroke: 2px #3a2e22; paint-order: stroke fill; }
+#jcard[data-g="gold"] .jc-tot b { color: #f0b820; -webkit-text-stroke-color: #8a5a00; text-shadow: 0 0 18px rgba(255,190,40,.7); }
+#jcard[data-g="silver"] .jc-tot b { color: #c9d2dc; -webkit-text-stroke-color: #5b6470; text-shadow: 0 0 14px rgba(200,215,230,.8); }
+#jcard[data-g="bronze"] .jc-tot b { color: #d98a48; -webkit-text-stroke-color: #6a3410; }
+.jc-tot span { font-weight: 800; font-size: 12px; color: #5a4a35; }
+.jc-tot em { font-style: normal; font-weight: 900; font-size: 12px; color: #fff; background: #3a2e22; border-radius: 6px; padding: 1px 8px; margin-top: 3px; }
+#jcard[data-g="gold"] .jc-tot em { background: #c48a00; } #jcard[data-g="silver"] .jc-tot em { background: #6b7480; } #jcard[data-g="bronze"] .jc-tot em { background: #a85a22; }
 .jc-mid { display: flex; align-items: center; gap: 10px; }
 .jc-why { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6; font-weight: 700; color: #3a2a1c; }
 .jc .row { display: flex; gap: 8px; } .jc .row .btn { flex: 1; }
@@ -408,3 +420,6 @@ body { background: radial-gradient(circle at 50% 30%, #2a221c, #0f0c0a 70%); }
 .rk-nm { font-size: 13px; color: #5a4a35; margin-left: 6px; font-weight: 800; }
 #wr-st { white-space: nowrap; font-size: 12px; }
 #s-title #btn-make { font-size: 17px; }
+
+.call { transform-origin: center; }
+#jc-radar { width: 150px; height: 135px; flex: 0 0 auto; }

@@ -14,16 +14,19 @@
     const out = [];
     if (r.winner < 0) { if (r.endBy === 'time') out.push({ t: '時間切れ判定' }); return out; }
     const w = r.winner ? w1 : w0, l = r.winner ? w0 : w1, wr = r.winner ? r.rb : r.ra;
-    if (sum(l.st) - sum(w.st) >= 40) out.push({ t: '下剋上！', gold: true });
+    if (sum(l.st) - sum(w.st) >= 60) out.push({ t: '下剋上！', gold: true });
     if (r.endBy === 'break' && r.hitN === 1) out.push({ t: '一撃！', gold: true });
     if (w.ch === l.ch) out.push({ t: '同じ字対決' });
-    if (l.orig && !w.orig) out.push({ t: '元の字を超えた' });
-    if (w.prep.length < l.prep.length - 8) out.push({ t: '画数の差をはね返した', gold: true });
+    if (l.orig && !w.orig) out.push({ t: '手本を超えた' });
+    if (w.hw && w.j.rep >= 95) out.push({ t: OK.repTitle(w) + 'の一筆', gold: true });
+    if (w.hw && !l.hw && !l.orig) out.push({ t: '手書きが組み替えを破る' });
+    if ((w.nref || w.prep.length) < (l.nref || l.prep.length) - 8) out.push({ t: '画数の差をはね返した', gold: true });
     if (r.endBy === 'break' && wr < 0.45) out.push({ t: 'ギリギリの勝ち' });
     if (r.endBy === 'time') out.push({ t: '時間切れ判定' });
     return out.slice(0, 2);
   };
-  OK.workName = w => '「' + w.ch + '」' + (w.orig ? '（元の字）' : '');
+  OK.whoOf = w => (OK.Works && OK.Works.nameOf(w.s)) || (OK.Chal && OK.Chal.names[w.s]) || '';
+  OK.workName = w => { const n = OK.whoOf(w); return (n ? n + 'の' : '') + '「' + w.ch + '」' + (w.orig ? '（手本）' : ''); };
 
   async function fontsReady() {
     if (!document.fonts || !document.fonts.load) return;
@@ -103,7 +106,7 @@
       c.font = '400 40px ' + F_FUDE; c.fillStyle = '#d8c6a4'; c.fillText('と', RX, 352);
     } else {
       c.font = '800 22px ' + F_UI; c.fillStyle = '#d8c6a4';
-      c.fillText(w.orig ? '元の字のまま' : '組み替えた「' + w.ch + '」', RX, 150);
+      c.fillText((OK.whoOf(w) ? OK.whoOf(w) + '・' : '') + (w.hw ? '書いた字 再現度' + w.j.rep.toFixed(1) + '%' : w.orig ? '手本の字' : '組み替えた作品') + '・総合' + sum(w.st), RX, 150);
       bigChar(c, w.ch, RX, 248, 150);
       c.font = '400 60px ' + F_FUDE; c.fillStyle = '#fff'; c.fillText('の勝ち！', RX, 350);
       c.font = '800 26px ' + F_UI; c.fillStyle = '#e9dcc0';
