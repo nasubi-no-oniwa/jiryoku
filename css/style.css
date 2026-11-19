@@ -282,7 +282,7 @@ body { background: radial-gradient(circle at 50% 30%, #2a221c, #0f0c0a 70%); }
 .cp .note { margin: 0; }
 
 /* あなたの作品 */
-#s-works { align-items: stretch; justify-content: center; background: rgba(22,18,15,.94); padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+#s-works, #s-rank { align-items: stretch; justify-content: center; background: rgba(22,18,15,.94); padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
 .mc-info b { font-family: 'Yuji Syuku', serif; font-weight: 400; font-size: 24px; }
 .mc-rec .code { font-family: 'Dela Gothic One'; font-size: 15px; color: var(--red-d); letter-spacing: .05em; }
 .mc-rec .rec { font-size: 13px; color: #4a3a2a; }
@@ -392,3 +392,19 @@ body { background: radial-gradient(circle at 50% 30%, #2a221c, #0f0c0a 70%); }
 #wr-empty p { margin: 0; }
 
 .st-list .tot { border-bottom: none; border-top: 2px solid rgba(60,40,20,.35); margin-top: 2px; font-size: 13px; color: var(--red-d); }
+
+/* ---------- 字力：番付 ---------- */
+
+
+.rk-tabs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px 0; }
+.rk-q { display: inline-flex; gap: 6px; } .rk-q input { width: 84px; font: inherit; font-size: 16px; padding: 6px 8px; border-radius: 10px; border: 2px solid rgba(60,40,20,.2); }
+.rk-note { padding: 4px 12px 0; margin: 0; }
+.mc.rk { display: flex; align-items: center; gap: 10px; }
+.mc.rk .mc-info { flex: 1; min-width: 0; }
+.rk-no { font-family: 'Dela Gothic One'; font-size: 22px; width: 34px; text-align: center; color: #7a6a55; }
+.mc.rk.top1 { box-shadow: inset 0 0 0 3px #e0a81e, 0 2px 0 #d9c8a6; } .mc.rk.top1 .rk-no { color: #c48a00; font-size: 28px; }
+.mc.rk.top2 { box-shadow: inset 0 0 0 3px #aab4be, 0 2px 0 #d9c8a6; } .mc.rk.top3 { box-shadow: inset 0 0 0 3px #c8793a, 0 2px 0 #d9c8a6; }
+.mc.rk.me { background: #fff3d6; }
+.rk-nm { font-size: 13px; color: #5a4a35; margin-left: 6px; font-weight: 800; }
+#wr-st { white-space: nowrap; font-size: 12px; }
+#s-title #btn-make { font-size: 17px; }

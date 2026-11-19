@@ -34,8 +34,8 @@
     st.form = keepForm && st.forms.includes(keepForm) ? keepForm : st.forms[0];
     setForm(st.form, true);
     showEmpty(false);
-    let seen = false; try { seen = localStorage.getItem('ok_tut') === '1'; } catch (e) {}
-    if (!seen) { try { localStorage.setItem('ok_tut', '1'); } catch (e) {} setTimeout(() => E.tutorial(0), 350); }
+    let seen = false; try { seen = localStorage.getItem('jr_tut') === '1'; } catch (e) {}
+    if (!seen) { try { localStorage.setItem('jr_tut', '1'); } catch (e) {} setTimeout(() => E.tutorial(0), 350); }
     return true;
   }
   E.pick = pick;

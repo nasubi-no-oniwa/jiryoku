@@ -45,7 +45,7 @@
   let R = null;
   const st = () => OK.st;
   class Room {
-    constructor(db, code) { this.db = db; this.code = clean(code); this.name = '漢'; this.id = uid(); this.slot = -1; this.watching = false; this.players = {}; this.subs = []; this.ms = []; this.game = null; this.sel = {}; this.left = false; this.root = db.ref('ok/' + this.code); }
+    constructor(db, code) { this.db = db; this.code = clean(code); this.name = '漢'; this.id = uid(); this.slot = -1; this.watching = false; this.players = {}; this.subs = []; this.ms = []; this.game = null; this.sel = {}; this.left = false; this.root = db.ref('jr/' + this.code); }
     on(ref, ev, fn, list) { ref.on(ev, fn); (list || this.subs).push([ref, ev, fn]); }
     async join() {
       if (!this.code) throw new Error('部屋番号を入れてください');
@@ -173,7 +173,7 @@
       $('on-err').textContent = '';
       if (!clean(code)) { $('on-err').textContent = '部屋番号を入れてください'; return; }
       if (!OK.Works.list().length) { $('on-err').textContent = '先に「字をばらして作る」で作品を1つ作ってください'; if (QM.state() !== 'idle') QM.cancel(); return; }
-      store('ok_room', code);
+      store('jr_room', code);
       $('btn-join').disabled = true;
       try {
         const db = await getDb(); R = new Room(db, code); OK.room = R;

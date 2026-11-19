@@ -3,7 +3,7 @@
 // =============================================
 
 // Xの投稿で引用するツイート（なすびのお庭の管理ページ quote/ で日本語・英語を貼りかえられる）
-var NQ=window.__nq||(window.__nq={q:{}});if(!NQ.f){NQ.f=1;fetch('https://ft-red-default-rtdb.asia-southeast1.firebasedatabase.app/xquote/g/otokonoji.json').then(r=>r.json()).then(d=>{if(d&&typeof d==='object')NQ.q=d;}).catch(()=>{});}
+var NQ=window.__nq||(window.__nq={q:{}});if(!NQ.f){NQ.f=1;fetch('https://ft-red-default-rtdb.asia-southeast1.firebasedatabase.app/xquote/g/jiryoku.json').then(r=>r.json()).then(d=>{if(d&&typeof d==='object')NQ.q=d;}).catch(()=>{});}
 function quoteURL(){let l='';try{if(typeof lang==='string')l=lang;}catch(e){}if(!l)l=document.documentElement.lang||'ja';const u=(l.slice(0,2)==='ja'?NQ.q.ja:NQ.q.en)||'';return /^https:\/\/x\.com\/[A-Za-z0-9_]{1,15}\/status\/\d{5,25}$/.test(u)?u:'';}
 function xIntent(text,url){const q=quoteURL();return 'https://x.com/intent/post?text='+encodeURIComponent(q?text+'\n'+url:text)+'&url='+encodeURIComponent(q||url);}
 function xIntentT(text){const q=quoteURL();return 'https://x.com/intent/post?text='+encodeURIComponent(text)+(q?'&url='+encodeURIComponent(q):'');}
@@ -11,7 +11,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
 (function () {
   const OK = window.OK, R = OK.R, SH = OK.SH, GL = OK.GL;
   const $ = id => document.getElementById(id);
-  const URL_GAME = 'https://nasubi-no-oniwa.github.io/otokonoji/';
+  const URL_GAME = 'https://nasubi-no-oniwa.github.io/jiryoku/';
   const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const S = () => OK.S || { play() {}, bgm() {} };
@@ -40,8 +40,8 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
   // ---------- あなたの作品（この端末に覚える） ----------
   const WMAX = 60;
   const Works = OK.Works = {
-    list: () => store.get('ok_works', []),
-    save(L) { store.set('ok_works', L.slice(-WMAX)); },
+    list: () => store.get('jr_works', []),
+    save(L) { store.set('jr_works', L.slice(-WMAX)); },
     find(s) { return Works.list().find(x => x.s === s) || null; },
     add(s) { const L = Works.list(); if (L.some(x => x.s === s)) return false; L.push({ s, t: Date.now(), own: true }); Works.save(L); return true; },
     setCode(s, code) { const L = Works.list(); let e = L.find(x => x.s === s); if (!e) { e = { s, t: Date.now() }; L.push(e); } e.code = code; Works.save(L); },
@@ -68,7 +68,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
       <div class="sl-top">
         <div class="sl-shape"><canvas width="240" height="240" style="width:120px;height:120px" data-shape="${i}"></canvas></div>
         <div class="sl-info">
-          <div class="sl-name"><span class="sl-ch">${esc(w.ch)}</span><small>${w.hw ? '書いた字・再現度' + w.j.rep.toFixed(1) + '%' : w.orig ? '元の字のまま' : '組み替えた作品'}・${w.nref || w.prep.length}画</small><small>${esc(Works.nameOf(w.s) || (w.orig ? '手本' : ''))}</small></div>
+          <div class="sl-name"><span class="sl-ch">${esc(w.ch)}</span><small>${w.hw ? '書いた字・再現度' + w.j.rep.toFixed(1) + '%' : w.orig ? '元の字のまま' : '組み替えた作品'}・${w.nref || w.prep.length}画</small><small>${esc(Works.nameOf(w.s) || (OK.Chal && OK.Chal.names[w.s]) || (w.orig ? '手本' : ''))}</small></div>
           ${i === 1 && st.chal ? `<span class="badge">挑戦状 ${OK.Chal.fmt(st.chal.id)}</span>` : ''}
         </div>
       </div>
@@ -107,14 +107,14 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
   async function setSlot(i, s) {
     let w; try { w = await SH.make(s); } catch (e) { toast(e.message || '読みこめませんでした'); return; }
     st.slots[i].w = w; if (i === 0 || i === st.my) st.myLast = w;
-    if (st.mode === 'local' && st.practice) store.set('ok_prac', [st.slots[0].w && st.slots[0].w.s, st.slots[1].w && st.slots[1].w.s]);
+    if (st.mode === 'local' && st.practice) store.set('jr_prac', [st.slots[0].w && st.slots[0].w.s, st.slots[1].w && st.slots[1].w.s]);
     renderSlots(); if (st.mode !== 'local' && OK.Net) OK.Net.changed();
   }
   OK.setSlot = setSlot;
   // 練習試合：左＝自分の作品、右＝元の字（好きな字）
   OK.practice = async function (s) {
     st.mode = 'local'; st.practice = true; st.chal = null; st.my = -1; st.reveal = true; st.rnd = false;
-    const prev = store.get('ok_prac', [null, null]);
+    const prev = store.get('jr_prac', [null, null]);
     openSetup('練習試合');
     const left = s || (st.myLast && st.myLast.s) || prev[0] || (Works.list().slice(-1)[0] || {}).s;
     if (left) await setSlot(0, left); else { st.slots[0].w = null; }
@@ -136,7 +136,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     wpFor = i; const box = $('wp-list'); R.freeIn(box);
     const L = Works.list().slice().reverse();
     box.innerHTML = L.length ? '' : '<p class="mc-empty">まだ作品がありません。<br>「作る」から字をばらして作ってください。</p>';
-    const add = document.createElement('button'); add.className = 'wp-new'; add.textContent = '＋ 新しく作る'; add.onclick = () => { $('wpick').classList.remove('on'); OK.E.open(); }; box.appendChild(add);
+    const add = document.createElement('button'); add.className = 'wp-new'; add.textContent = '＋ 新しく作る'; add.onclick = () => { $('wpick').classList.remove('on'); OK.W.open(); }; box.appendChild(add);
     for (const e of L) {
       const b = document.createElement('button'); b.className = 'wp-item';
       const cv = thumb(e.s, 64, i); b.appendChild(cv);
@@ -161,7 +161,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     // 上：取り出す・引き継ぐ
     const tools = document.createElement('div'); tools.className = 'wk-tools';
     tools.innerHTML = `<button class="btn sm hot" data-t="new">＋ 新しく作る</button><button class="btn sm" data-t="get">番号で取り出す</button><button class="btn sm" data-t="out">引き継ぎコードを出す</button><button class="btn sm" data-t="in">引き継ぎコードを入れる</button>`;
-    tools.onclick = ev => { const b = ev.target.closest('button'); if (!b) return; S().play('ui'); ({ new: () => OK.E.open(), get: askNumber, out: acctOut, in: acctIn })[b.dataset.t](); };
+    tools.onclick = ev => { const b = ev.target.closest('button'); if (!b) return; S().play('ui'); ({ new: () => OK.W.open(), get: askNumber, out: acctOut, in: acctIn })[b.dataset.t](); };
     box.appendChild(tools);
     const L = Works.list().slice().reverse();
     if (!L.length) { box.insertAdjacentHTML('beforeend', '<p class="mc-empty">まだ作品がありません。<br>「＋ 新しく作る」から作れます。</p>'); return; }
@@ -172,11 +172,11 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
       const head = document.createElement('div'); head.className = 'mc-head'; head.appendChild(thumb(e.s, 64, 0));
       const info = document.createElement('div'); info.className = 'mc-info';
       const d = SH.decode(e.s) || {};
-      info.innerHTML = `<b>「${esc(d.ch || '?')}」</b><small>${esc(GL.FORM[d.form] || '')}・${own ? new Date(e.t).toLocaleDateString('ja-JP') + 'に作った' : 'ほかの人の作品（番号で取り出した）'}</small>` +
+      info.innerHTML = `<b>「${esc(d.ch || '?')}」</b><small>${SH.isW(e.s) ? '書いた字' : '組み替えた作品'}${e.name ? '・' + esc(e.name) : ''}・${own ? new Date(e.t).toLocaleDateString('ja-JP') + 'に作った' : 'ほかの人の作品（番号で取り出した）'}</small>` +
         `<div class="mc-rec">${e.code ? `<span class="code">${OK.Chal.fmt(e.code)}</span>${own ? `<span class="rec" data-rec="${e.code}">…</span>` : ''}` : '<span class="rec">合言葉なし</span>'}</div>`;
       head.appendChild(info); el.appendChild(head);
       const bt = document.createElement('div'); bt.className = 'mc-btns';
-      bt.innerHTML = `<button class="btn sm hot" data-a="pr">練習試合</button><button class="btn sm" data-a="ed">${own ? '作り直す' : '改造する'}</button>` +
+      bt.innerHTML = `<button class="btn sm hot" data-a="pr">練習試合</button><button class="btn sm" data-a="ed">${SH.isW(e.s) ? (own ? '書き直す' : '同じ字を書く') : (own ? '作り直す' : '改造する')}</button>` +
         (own ? (e.code ? '<button class="btn sm" data-a="cd">合言葉・投稿</button>' : '<button class="btn sm" data-a="ch">合言葉をつける</button>') : (e.code ? '<button class="btn sm" data-a="vs">この挑戦状と戦う</button>' : '')) +
         '<button class="btn sm" data-a="rm">消す</button>';
       bt.onclick = ev => {
@@ -212,6 +212,31 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     }
   }
   OK.openWorks = openWorks;
+  // ---------- 番付 ----------
+  let rkSeq = 0;
+  async function showRank(ch) {
+    const box = $('rank-list'), my = ++rkSeq; R.freeIn(box); box.innerHTML = '<p class="mc-empty">読みこみ中…</p>';
+    $('rk-all').classList.toggle('hot', !ch); $('rk-ch').classList.toggle('hot', !!ch || !$('rk-qbox').hidden);
+    let L; try { L = ch ? await OK.Chal.rankChar(ch) : await OK.Chal.rankAll(); } catch (e) { if (my === rkSeq) box.innerHTML = '<p class="mc-empty">読みこめませんでした。通信を確認してね</p>'; return; }
+    if (my !== rkSeq) return;
+    if (!L.length) { box.innerHTML = `<p class="mc-empty">${ch ? '「' + esc(ch) + '」の作品は、まだありません。<br>最初の1人になれます。' : 'まだ作品がありません。'}</p>`; return; }
+    box.innerHTML = '';
+    const mine = new Set(Works.codes());
+    L.forEach((c, i) => {
+      const el = document.createElement('div'); el.className = 'mc rk' + (i < 3 ? ' top' + (i + 1) : '') + (mine.has(c.id) ? ' me' : '');
+      const no = document.createElement('b'); no.className = 'rk-no'; no.textContent = i + 1; el.appendChild(no);
+      el.appendChild(thumb(c.w, 52, 0));
+      const info = document.createElement('div'); info.className = 'mc-info';
+      info.innerHTML = `<b>「${esc(c.ch || (SH.decode(c.w) || {}).ch || '?')}」<span class="rk-nm">${esc(c.n || '名なし')}</span></b><small data-st>${SH.isW(c.w) ? '書いた字' : '組み替えた作品'}</small><div class="mc-rec"><span class="rec">${c.wn || 0}勝${c.ln || 0}敗</span></div>`;
+      el.appendChild(info);
+      SH.make(c.w).then(w => { const t = info.querySelector('[data-st]'); if (t) t.textContent = (w.hw ? '書いた字・再現度' + w.j.rep.toFixed(1) + '%' : '組み替えた作品') + '・総合パワー' + SH.total(w.st); }).catch(() => {});
+      const b = document.createElement('button'); b.className = 'btn sm hot'; b.textContent = mine.has(c.id) ? 'あなた' : '挑む'; b.disabled = mine.has(c.id);
+      b.onclick = () => { S().play('ui'); OK.Chal.start(c); };
+      el.appendChild(b); box.appendChild(el);
+    });
+  }
+  function openRank() { show('s-rank'); $('rk-qbox').hidden = true; $('rk-note').textContent = '挑戦状として戦って勝った数の順です（同じなら負けの少ない順）。'; showRank(''); }
+
   function askNumber() {
     const dlg = OK.QM.dialog(`<h3>番号で取り出す</h3><p class="qm-sub">作品の番号（合言葉・8けた）を入れると、その作品を一覧に取り出せます。ほかの人の作品なら、改造もできます。</p><label class="qm-fld">番号<input id="gn-in" maxlength="11" autocomplete="off" autocapitalize="characters" placeholder="AB3K-7XQM"></label><p class="qm-err" id="gn-err"></p><button class="qm-b" id="gn-go">取り出す</button><button class="qm-b sub" id="gn-x">やめる</button>`);
     dlg.querySelector('#gn-x').onclick = () => OK.QM.close();
@@ -301,14 +326,14 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     let text = (tg.length ? '【' + tg.join('・') + '】' : '') + line;
     if (st.chal) text += `\n挑戦状【${OK.Chal.fmt(st.chal.id)}】に挑戦！あなたも→ ${OK.Chal.link(st.chal.id)}`;
     else text += '\n' + URL_GAME;
-    st.shareText = text + '\n#オトコノジ #漢ノ字 #ブラウザゲーム';
+    st.shareText = text + '\n#字力 #ブラウザゲーム';
   }
   async function openImage() {
     const r = st.result; if (!r || !st.live) return;
     const cv = $('res-img'), btn = $('btn-img'); btn.disabled = true; const t0 = btn.textContent; btn.textContent = '画像を作っています…';
     try {
       if (!st.imgReady) { await OK.drawResultImage(cv, { m: st.live, r, w: [st.slots[0].w, st.slots[1].w], chal: st.chal, url: URL_GAME }); st.imgReady = true; }
-      showImage(cv, st.shareText, 'otokonoji.png');
+      showImage(cv, st.shareText, 'jiryoku.png');
     } catch (e) { console.error(e); toast('画像を作れませんでした'); }
     btn.disabled = false; btn.textContent = t0;
   }
@@ -322,14 +347,14 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
   // 画像つきで投稿：スマホは画像と文をまとめてXのアプリへ。できない端末は画像を保存して投稿画面を開く
   OK.shareImage = async function (cv, text, fname) {
     const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
-    const file = new File([blob], fname || 'otokonoji.png', { type: 'image/png' });
+    const file = new File([blob], fname || 'jiryoku.png', { type: 'image/png' });
     try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share(nqS({ files: [file], text })); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
     saveImg(blob, fname);
     window.open(xIntentT(text), '_blank');
     toast('画像を保存しました。投稿画面に画像をつけてください');
   };
   function saveImg(blob, fname) {
-    const go = b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fname || 'otokonoji.png'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
+    const go = b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fname || 'jiryoku.png'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
     if (blob) go(blob); else if (ivShare) ivShare.cv.toBlob(go, 'image/png');
   }
 
@@ -397,6 +422,12 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     $('ch-rand').onclick = () => { S().play('ui'); OK.Chal.random(); };
     $('ch-back').onclick = () => { S().play('ui'); toTitle(); };
     $('btn-works').onclick = () => { S().play('ui'); openWorks(); };
+    $('btn-rank').onclick = () => { S().unlock(); S().play('ui'); if (!OK.hasDb()) { toast('通信の準備がまだです'); return; } openRank(); };
+    $('btn-rank-back').onclick = () => { S().play('ui'); toTitle(); };
+    $('rk-all').onclick = () => { S().play('ui'); openRank(); };
+    $('rk-ch').onclick = () => { S().play('ui'); $('rk-qbox').hidden = false; $('rk-all').classList.remove('hot'); $('rk-ch').classList.add('hot'); const last = (st.myLast && st.myLast.ch) || ''; if (!$('rk-q').value) $('rk-q').value = last; if ($('rk-q').value) $('rk-go').onclick(); else $('rk-q').focus(); };
+    $('rk-go').onclick = () => { const ch = GL.first($('rk-q').value); if (!ch) { toast('字を1つ入れてください'); return; } $('rk-note').textContent = '「' + ch + '」の作品の中で、勝った数の順です。'; showRank(ch); };
+    $('rk-q').onkeydown = e => { if (e.key === 'Enter') $('rk-go').onclick(); };
     $('chal-news').onclick = () => { S().play('ui'); openWorks(); };
     $('btn-works-back').onclick = () => { S().play('ui'); toTitle(); };
     $('btn-howto').onclick = () => { S().play('ui'); show('s-howto'); };
@@ -429,15 +460,15 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     $('btn-change').onclick = () => { S().play('ui'); $('result').classList.remove('on'); if (st.mode === 'watch') { toTitle(); return; } if (st.mode !== 'local' && OK.Net) OK.Net.again(); openSetup(); };
     $('btn-remake').onclick = () => { S().play('ui'); $('result').classList.remove('on'); (SH.isW(st.slots[0].w.s) ? OK.W : OK.E).open(st.slots[0].w.s); };
     $('btn-chal-next').onclick = () => { S().play('ui'); $('result').classList.remove('on'); OK.Chal.random(); };
-    $('btn-online').onclick = () => { S().unlock(); S().play('ui'); if (!OK.hasDb()) { toast('通信の準備がまだです'); return; } $('in-code').value = store.get('ok_room_v', '') || ''; $('on-form').classList.remove('hide'); $('on-wait').classList.add('hide'); $('on-err').textContent = ''; show('s-online'); };
+    $('btn-online').onclick = () => { S().unlock(); S().play('ui'); if (!OK.hasDb()) { toast('通信の準備がまだです'); return; } $('in-code').value = store.get('jr_room_v', '') || ''; $('on-form').classList.remove('hide'); $('on-wait').classList.add('hide'); $('on-err').textContent = ''; show('s-online'); };
     $('btn-on-back').onclick = () => { S().play('ui'); if (OK.Net) OK.Net.leave(); toTitle(); };
-    $('btn-join').onclick = () => { store.set('ok_room_v', $('in-code').value); if (OK.Net) OK.Net.join('', $('in-code').value); };
+    $('btn-join').onclick = () => { store.set('jr_room_v', $('in-code').value); if (OK.Net) OK.Net.join('', $('in-code').value); };
   }
   function setupQM() {
     QM.setup({
-      game: 'otokonoji', ver: 'v1', name: '漢ノ字',
-      getDb: () => OK.getDb(), anchor: '#btn-online', anchorWhere: 'before', btnClass: 'btn big hot', nextClass: 'btn', nameKey: 'ok_name',
-      check: () => { if (!OK.hasDb()) { toast('通信の準備がまだです'); return false; } if (!Works.list().length) { toast('先に「字をばらして作る」で作品を1つ作ってください'); return false; } return true; },
+      game: 'jiryoku', ver: 'v1', name: '字力',
+      getDb: () => OK.getDb(), anchor: '#btn-online', anchorWhere: 'before', btnClass: 'btn big hot', nextClass: 'btn', nameKey: 'jr_name',
+      check: () => { if (!OK.hasDb()) { toast('通信の準備がまだです'); return false; } if (!Works.list().length) { toast('先に「字を書いて作る」で作品を1つ作ってください'); return false; } return true; },
       join: (code) => { S().unlock(); if (!st.myLast) { const L = Works.list(); if (L.length) SH.make(L[L.length - 1].s).then(w => { st.myLast = w; }).catch(() => {}); } OK.Net.join('', code); },
       cpu: () => OK.Chal.random(true), cpuLabel: '挑戦状と戦いながら待つ',
       quit: () => { if (OK.Net) OK.Net.leave(); toTitle(); },

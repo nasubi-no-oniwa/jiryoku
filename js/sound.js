@@ -6,7 +6,7 @@
 (function () {
   const OK = window.OK;
   let ac = null, bus = null, master = null, mus = null, nbuf = null, sfx = null, SP = null, mark = 0;
-  let muted = (() => { try { return localStorage.getItem('ok_mute') === '1'; } catch (e) { return false; } })();
+  let muted = (() => { try { return localStorage.getItem('jr_mute') === '1'; } catch (e) { return false; } })();
   const url = n => (OK.ASSETS && OK.ASSETS[n]) || ('assets/' + n);
   function A() {
     try {
@@ -118,6 +118,6 @@
     play(k, v) { if (FX[k]) FX[k](v == null ? 1 : v); },
     bgm(k) { bg.want = k === 'battle' ? 'battle' : 'title'; bg.start(bg.want); },
   };
-  OK.mute = v => { if (v != null) { muted = v; try { localStorage.setItem('ok_mute', v ? '1' : '0'); } catch (e) {} if (master) master.gain.value = v ? 0 : 1; } return muted; };
+  OK.mute = v => { if (v != null) { muted = v; try { localStorage.setItem('jr_mute', v ? '1' : '0'); } catch (e) {} if (master) master.gain.value = v ? 0 : 1; } return muted; };
   window.addEventListener('pointerdown', () => OK.S.unlock(), { once: false, passive: true });
 })();

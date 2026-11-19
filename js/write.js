@@ -7,7 +7,6 @@
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const E = OK.W = {};
-  const LW = SH.HW * 2;   // 書く線の太さ（試合の形と同じ太さ。0〜1000 の箱で）
   const st = { ch: '', form: '', forms: [], ref: null, strokes: [], cur: null, t0: 0, size: 300, w: null };
 
   // ---------- ひらく ----------
@@ -65,14 +64,20 @@
     g.beginPath(); g.moveTo(500, 0); g.lineTo(500, 1000); g.moveTo(0, 500); g.lineTo(1000, 500); g.stroke(); g.setLineDash([]);
     // 外わく
     g.strokeStyle = 'rgba(200,60,40,.7)'; g.lineWidth = 8; g.strokeRect(4, 4, 992, 992);
-    // 書いた線
-    g.strokeStyle = '#1b1612'; g.fillStyle = '#1b1612'; g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = LW;
+    // 書いた線（ゆっくりは太く、速いと細く）
+    g.strokeStyle = '#1b1612'; g.fillStyle = '#1b1612'; g.lineCap = 'round'; g.lineJoin = 'round';
     const all = st.cur ? st.strokes.concat([st.cur]) : st.strokes;
-    for (const s of all) {
-      if (s.length <= 3) { g.beginPath(); g.arc(s[0], s[1], LW / 2, 0, Math.PI * 2); g.fill(); continue; }
-      g.beginPath(); g.moveTo(s[0], s[1]); for (let i = 3; i < s.length; i += 3) g.lineTo(s[i], s[i + 1]); g.stroke();
-    }
+    for (const s of all) E.ink(g, s, SH.radii(s), 1, 0, 0);
   }
+  // 太さの変わる線を描く（k：倍率、ox・oy：ずらし）
+  E.ink = function (c, s, rad, k, ox, oy) {
+    const n = s.length / 3;
+    if (n <= 1) { c.beginPath(); c.arc(ox + s[0] * k, oy + s[1] * k, rad[0] * k, 0, Math.PI * 2); c.fill(); return; }
+    for (let i = 0; i < n - 1; i++) {
+      c.lineWidth = (rad[i] + rad[i + 1]) * k;
+      c.beginPath(); c.moveTo(ox + s[3 * i] * k, oy + s[3 * i + 1] * k); c.lineTo(ox + s[3 * i + 3] * k, oy + s[3 * i + 4] * k); c.stroke();
+    }
+  };
   function pos(ev) { const r = cv.getBoundingClientRect(); return [Math.round(Math.max(0, Math.min(1000, (ev.clientX - r.left) / r.width * 1000))), Math.round(Math.max(0, Math.min(1000, (ev.clientY - r.top) / r.height * 1000)))]; }
   let pid = null;
   function down(ev) {

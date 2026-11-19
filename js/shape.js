@@ -56,17 +56,18 @@
 
   // ---------- マス目に塗る ----------
   // 返り値：own[マス] ＝ そのマスを塗った画の番号＋1（重なりは最初の画）、cnt：塗ったマスの数、by[画] ＝ その画が塗ったマスの一覧
-  function raster(prep, pls) {
+  // rad：書いた字のときだけ。rad[画][点] ＝ その点での線の太さの半分
+  function raster(prep, pls, rad) {
     const own = new Int16Array(N * N), by = [];
-    const R2 = HW * HW;
     for (const pl of pls) {
-      const p = prep[pl.i], pts = SH.points(p, pl), mine = [];
-      const segs = pts.length === 2 ? [[pts[0], pts[1], pts[0], pts[1]]] : [];
-      for (let i = 0; i + 3 < pts.length; i += 2) segs.push([pts[i], pts[i + 1], pts[i + 2], pts[i + 3]]);
+      const p = prep[pl.i], pts = SH.points(p, pl), mine = [], rr = rad && rad[pl.i];
+      const segs = pts.length === 2 ? [[pts[0], pts[1], pts[0], pts[1], rr ? rr[0] : HW, rr ? rr[0] : HW]] : [];
+      for (let i = 0; i + 3 < pts.length; i += 2) segs.push([pts[i], pts[i + 1], pts[i + 2], pts[i + 3], rr ? rr[i / 2] : HW, rr ? rr[i / 2 + 1] : HW]);
       const seen = new Uint8Array(N * N);
-      for (const [ax, ay, bx, by2] of segs) {
-        const gx0 = Math.max(0, Math.floor((Math.min(ax, bx) - HW) / CELL)), gx1 = Math.min(N - 1, Math.floor((Math.max(ax, bx) + HW) / CELL));
-        const gy0 = Math.max(0, Math.floor((Math.min(ay, by2) - HW) / CELL)), gy1 = Math.min(N - 1, Math.floor((Math.max(ay, by2) + HW) / CELL));
+      for (const [ax, ay, bx, by2, r0, r1] of segs) {
+        const HWm = r0 > r1 ? r0 : r1;
+        const gx0 = Math.max(0, Math.floor((Math.min(ax, bx) - HWm) / CELL)), gx1 = Math.min(N - 1, Math.floor((Math.max(ax, bx) + HWm) / CELL));
+        const gy0 = Math.max(0, Math.floor((Math.min(ay, by2) - HWm) / CELL)), gy1 = Math.min(N - 1, Math.floor((Math.max(ay, by2) + HWm) / CELL));
         const ex = bx - ax, ey = by2 - ay, l2 = ex * ex + ey * ey;
         for (let gy = gy0; gy <= gy1; gy++) {
           const py = (gy + 0.5) * CELL;
@@ -74,8 +75,8 @@
             const k = gy * N + gx; if (seen[k]) continue;
             const px = (gx + 0.5) * CELL;
             let t = l2 > 0 ? ((px - ax) * ex + (py - ay) * ey) / l2 : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
-            const qx = ax + ex * t - px, qy = ay + ey * t - py;
-            if (qx * qx + qy * qy <= R2) { seen[k] = 1; mine.push(k); if (!own[k]) own[k] = pl.i + 1; }
+            const qx = ax + ex * t - px, qy = ay + ey * t - py, rt = r0 + (r1 - r0) * t;
+            if (qx * qx + qy * qy <= rt * rt) { seen[k] = 1; mine.push(k); if (!own[k]) own[k] = pl.i + 1; }
           }
         }
       }
@@ -228,7 +229,7 @@
   // ---------- 形と強さ ----------
   // prep：SH.prep の結果、pls：置き方 [{i,x,y,r}]、opt.full：輪郭（試合用の形）も作る
   SH.build = function (prep, pls, opt = {}) {
-    const ras = raster(prep, pls), cmp = components(ras.own);
+    const ras = raster(prep, pls, opt.rad), cmp = components(ras.own);
     // 画ごとに、どのかたまりに入っているか
     const strokeComp = pls.map(pl => { const m = ras.by[pl.i]; return m && m.length ? cmp.lab[m[0]] : -1; });
     // いちばん画が多いかたまり（同じなら大きい方）
@@ -309,6 +310,22 @@
     return { form: m[1], ch: m[2], strokes };
   };
   SH.isW = s => typeof s === 'string' && s[0] === 'w';
+  // 書いた線の太さ（半分）。ゆっくり引くと太く、すっと払うと細くとがる
+  // st：[x,y,t,...]（t はミリ秒）。前後2点ずつの速さでならす
+  SH.HWW = 27;
+  SH.radii = function (st) {
+    const n = st.length / 3, out = [];
+    for (let i = 0; i < n; i++) {
+      const a = Math.max(0, i - 2), b = Math.min(n - 1, i + 2); let d = 0;
+      for (let k = a; k < b; k++) { const dx = st[3 * k + 3] - st[3 * k], dy = st[3 * k + 4] - st[3 * k + 1]; d += Math.sqrt(dx * dx + dy * dy); }
+      const dt = Math.max(20, st[3 * b + 2] - st[3 * a + 2]), v = d / dt;   // 1ミリ秒あたりの長さ
+      let m = 1.32 - 0.5 * v; m = m < 0.42 ? 0.42 : m > 1.32 ? 1.32 : m;
+      out.push(SH.HWW * m);
+    }
+    // 書き終わりは少し細く（はらい・はねの先）
+    if (n >= 4) { const e = out[n - 1], f = out[n - 2]; if (e < SH.HWW) { out[n - 1] = e * 0.7; out[n - 2] = f * 0.88; } }
+    return out;
+  };
   const baseMemo = new Map();
   async function baseOf(form, ch, ref) {
     const k = form + ch; if (baseMemo.has(k)) return baseMemo.get(k);
@@ -321,11 +338,13 @@
     const g = await OK.GL.get(w.ch); if (!g || !g.forms[w.form]) throw new Error('その字の画がありません');
     const ref = g.forms[w.form], base = await baseOf(w.form, w.ch, ref);
     const xy = w.strokes.map(st => { const o = []; for (let i = 0; i < st.length; i += 3) o.push(Math.max(0, Math.min(1000, st[i])), Math.max(0, Math.min(1000, st[i + 1]))); return o; });
-    const prep = SH.prep(xy), pls = SH.original(prep), b = SH.build(prep, pls, { full: true });
+    const rad = w.strokes.map(SH.radii);
+    const prep = SH.prep(xy), pls = SH.original(prep), b = SH.build(prep, pls, { full: true, rad });
     const j = OK.JD.judge(w.strokes, ref, w.form), r = OK.JD.stats(base.st, j);
-    return { s, hw: true, form: w.form, ch: w.ch, strokes: w.strokes, xy, ref, pls, prep, b, st: r.st, base: base.st, j, jr: r, nref: ref.length, orig: false };
+    return { s, hw: true, form: w.form, ch: w.ch, strokes: w.strokes, xy, rad, ref, pls, prep, b, st: r.st, base: base.st, j, jr: r, nref: ref.length, orig: false };
   }
   SH.decode = function (s) {
+    if (SH.isW(s)) return SH.decodeW(s);   // 書いた作品は {form, ch, strokes}
     const m = /^([jclh])(.+?):([0-9,;]*)$/u.exec(String(s || ''));
     if (!m || [...m[2]].length !== 1) return null;
     const pls = m[3] ? m[3].split(';').map(t => { const v = t.split(',').map(Number); return { i: v[0], x: v[1], y: v[2], r: v[3] }; }) : [];

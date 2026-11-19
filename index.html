@@ -46,13 +46,14 @@
     <p class="sub">字をえらんで、<b>手本なしで自分の手で書け</b>。<br>きれいに書くほど字の力が出る。くせ字は、くせのまま戦う。</p>
     <div class="t-btns">
       <button class="btn big hot" id="btn-write">字を書いて作る</button>
-      <button class="btn blue wide" id="btn-make">字をばらして組み替える</button>
+      <button class="btn big blue" id="btn-make">字をばらして組み替える</button>
       <div class="row t-row2">
         <button class="btn sm2" id="btn-practice">練習試合</button>
         <button class="btn sm2" id="btn-chal">挑戦状と戦う</button>
       </div>
       <button class="btn big blue" id="btn-online">部屋番号で対戦</button>
       <div class="row t-row2">
+        <button class="btn sm2" id="btn-rank">番付</button>
         <button class="btn sm2" id="btn-works">あなたの作品</button>
         <button class="btn sm2" id="btn-howto">あそびかた</button>
         <button class="btn sm2" id="btn-snd">音：<span id="snd-name">あり</span></button>
@@ -235,6 +236,16 @@
   </div>
 </section>
 
+<!-- 番付 -->
+<section class="screen" id="s-rank">
+  <div class="panel">
+    <header class="p-head"><button class="btn sm ghost" id="btn-rank-back">← もどる</button><h2>番付</h2></header>
+    <div class="rk-tabs"><button class="btn sm hot" id="rk-all">全体</button><button class="btn sm" id="rk-ch">字ごとの最強</button>
+      <span class="rk-q" id="rk-qbox" hidden><input id="rk-q" maxlength="8" autocomplete="off" autocapitalize="off" placeholder="例：永"><button class="btn sm hot" id="rk-go">見る</button></span></div>
+    <p class="note rk-note" id="rk-note">挑戦状として戦って勝った数の順です（同じなら負けの少ない順）。</p>
+    <div class="p-body"><div id="rank-list"></div></div>
+  </div>
+</section>
 <!-- 挑戦状と戦う -->
 <section class="screen" id="s-chal">
   <div class="card">
