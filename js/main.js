@@ -46,6 +46,8 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     add(s) { const L = Works.list(); if (L.some(x => x.s === s)) return false; L.push({ s, t: Date.now(), own: true }); Works.save(L); return true; },
     setCode(s, code) { const L = Works.list(); let e = L.find(x => x.s === s); if (!e) { e = { s, t: Date.now() }; L.push(e); } e.code = code; Works.save(L); },
     remove(s) { Works.save(Works.list().filter(x => x.s !== s)); },
+    setName(s, n) { const L = Works.list(); const e = L.find(x => x.s === s); if (e) { e.name = n; Works.save(L); } },
+    nameOf(s) { const e = Works.find(s); return e && e.name || ''; },
     codes: () => Works.list().filter(x => x.code && x.own !== false).map(x => x.code),
     lastMade: () => st.myLast,
   };
@@ -66,7 +68,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
       <div class="sl-top">
         <div class="sl-shape"><canvas width="240" height="240" style="width:120px;height:120px" data-shape="${i}"></canvas></div>
         <div class="sl-info">
-          <div class="sl-name"><span class="sl-ch">${esc(w.ch)}</span><small>${w.orig ? '元の字のまま' : '組み替えた作品'}・${w.prep.length}画</small><small>${esc(GL.FORM[w.form])}</small></div>
+          <div class="sl-name"><span class="sl-ch">${esc(w.ch)}</span><small>${w.hw ? '書いた字・再現度' + w.j.rep.toFixed(1) + '%' : w.orig ? '元の字のまま' : '組み替えた作品'}・${w.nref || w.prep.length}画</small><small>${esc(Works.nameOf(w.s) || (w.orig ? '手本' : ''))}</small></div>
           ${i === 1 && st.chal ? `<span class="badge">挑戦状 ${OK.Chal.fmt(st.chal.id)}</span>` : ''}
         </div>
       </div>

@@ -106,6 +106,9 @@
     st.w = w; showCard(w);
   }
   E.card = showCard;
+  // 名前のおまかせ（書道の号っぽく）
+  const NA = ['墨', '筆', '硯', '雅', '翠', '月', '風', '雲', '石', '竹', '松', '梅', '鶴', '龍', '虎', '桜'], NB = ['舟', '庵', '堂', '斎', '山', '水', '亭', '園', '仙', '泉'];
+  E.autoName = () => NA[Math.floor(Math.random() * NA.length)] + NB[Math.floor(Math.random() * NB.length)];
   function showCard(w) {
     $('jc-rep').textContent = w.j.rep.toFixed(1) + '%';
     $('jc-pow').textContent = '素質の ' + Math.round(w.jr.k * 100) + '% を出せる';
@@ -115,6 +118,7 @@
     const j = w.j, why = w.jr.why.slice();
     why.unshift(`画数：${j.nu}画（手本${j.nr}画）${j.order === true ? '・書き順○' : j.order === false ? '・書き順×' : ''}`);
     $('jc-why').innerHTML = why.map(t => `<li>${esc(t)}</li>`).join('');
+    try { $('jc-name').value = localStorage.getItem('jr_name') || ''; } catch (e) {}
     $('jcard').classList.add('on');
   }
   function closeCard() { $('jcard').classList.remove('on'); }
@@ -134,7 +138,14 @@
     $('wr-clear').onclick = () => { st.strokes = []; st.t0 = 0; draw(); upd(); };
     $('wr-done').onclick = done;
     $('jc-again').onclick = () => { closeCard(); st.strokes = []; st.t0 = 0; draw(); upd(); };
-    $('jc-save').onclick = () => { if (!st.w) return; OK.Works.add(st.w.s); closeCard(); OK.practice(st.w.s); };
+    $('jc-save').onclick = () => {
+      if (!st.w) return;
+      let nm = $('jc-name').value.replace(/\s+/g, ' ').trim().slice(0, 12);
+      if (!nm) nm = E.autoName();
+      try { localStorage.setItem('jr_name', $('jc-name').value.trim().slice(0, 12)); } catch (e) {}
+      OK.Works.add(st.w.s); OK.Works.setName && OK.Works.setName(st.w.s, nm);
+      closeCard(); OK.practice(st.w.s);
+    };
     window.addEventListener('resize', () => { if (document.querySelector('#s-make.active')) { resize(); draw(); } });
   }
   E.bind = bind;   // main.js の起動から呼ばれる

@@ -383,3 +383,6 @@ body { background: radial-gradient(circle at 50% 30%, #2a221c, #0f0c0a 70%); }
 .jc-mid { display: flex; align-items: center; gap: 10px; }
 .jc-why { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6; font-weight: 700; color: #3a2a1c; }
 .jc .row { display: flex; gap: 8px; } .jc .row .btn { flex: 1; }
+
+.jc-name { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13px; color: #5a4a35; }
+.jc-name input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 8px 10px; border-radius: 10px; border: 2px solid rgba(60,40,20,.2); background: #fff; }
