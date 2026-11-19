@@ -72,7 +72,7 @@
     const SNAP = 900;
     let snap = null; try { snap = R.snapshot(m, SNAP, r.endBy === 'break' ? r.lastEv : null); } catch (e) { snap = null; }
     const hx = r.endBy === 'break' && r.lastEv ? r.lastEv.x : (m.A.x + m.B.x) / 2, hy = r.endBy === 'break' && r.lastEv ? r.lastEv.y : (m.A.y + m.B.y) / 2;
-    const zoom = 0.85, sw = LW / zoom, sh = H / zoom;
+    const zoom = 1.12, sw = LW / zoom, sh = H / zoom;
     let fx = LW / 2, fy = H / 2;
     c.save(); c.beginPath(); c.rect(0, 0, LW, H); c.clip();
     if (snap) {
@@ -90,10 +90,10 @@
     const vg = c.createRadialGradient(fx, fy, 170, fx, fy, 600); vg.addColorStop(0, 'rgba(18,14,11,0)'); vg.addColorStop(1, 'rgba(18,14,11,.85)'); c.fillStyle = vg; c.fillRect(0, 0, LW, H);
     const fade = c.createLinearGradient(LW - 230, 0, LW, 0); fade.addColorStop(0, 'rgba(18,14,11,0)'); fade.addColorStop(1, 'rgba(18,14,11,1)'); c.fillStyle = fade; c.fillRect(LW - 230, 0, 230, H);
     c.restore();
-    logo(c, 30, 46, 40);
+    logo(c, 36, 56, 46);
     const draw = r.winner < 0, w = draw ? null : (r.winner ? w1 : w0), l = draw ? null : (r.winner ? w0 : w1);
     // 朱のはんこ
-    c.save(); c.translate(1100, 92); c.rotate(0.12);
+    c.save(); c.translate(1094, 98); c.rotate(0.12);
     c.fillStyle = draw ? '#6a5a4a' : '#c8281c'; c.beginPath(); c.arc(0, 0, 58, 0, Math.PI * 2); c.fill();
     c.strokeStyle = '#f6eedb'; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, 50, 0, Math.PI * 2); c.stroke();
     c.fillStyle = '#f6eedb'; c.textAlign = 'center'; c.font = '400 34px ' + F_FUDE;
@@ -106,8 +106,9 @@
       c.font = '400 40px ' + F_FUDE; c.fillStyle = '#d8c6a4'; c.fillText('と', RX, 352);
     } else {
       c.font = '800 22px ' + F_UI; c.fillStyle = '#d8c6a4';
-      c.fillText((OK.whoOf(w) ? OK.whoOf(w) + '・' : '') + (w.hw ? '書いた字 再現度' + w.j.rep.toFixed(1) + '%' : w.orig ? '手本の字' : '組み替えた作品') + '・総合' + sum(w.st), RX, 150);
-      bigChar(c, w.ch, RX, 248, 150);
+      c.fillText((OK.whoOf(w) ? OK.whoOf(w) + '・' : '') + (w.hw ? '書いた字 再現度' + w.j.rep.toFixed(1) + '%' : w.orig ? '手本の字' : '組み替えた作品') + '・総合' + sum(w.st), RX - 20, 160);
+      { const gl = c.createRadialGradient(RX, 248, 10, RX, 248, 250); gl.addColorStop(0, 'rgba(255,190,40,.42)'); gl.addColorStop(0.5, 'rgba(210,48,31,.16)'); gl.addColorStop(1, 'rgba(18,14,11,0)'); c.fillStyle = gl; c.fillRect(LW - 60, 0, W - LW + 60, 520); }
+      bigChar(c, w.ch, RX, 248, 168);
       c.font = '400 60px ' + F_FUDE; c.fillStyle = '#fff'; c.fillText('の勝ち！', RX, 350);
       c.font = '800 26px ' + F_UI; c.fillStyle = '#e9dcc0';
       c.fillText(OK.workName(l) + ' を破る', RX, 404);
@@ -116,6 +117,7 @@
     const bar = (yy, wk, b, side) => {
       const x0 = RX - 210, bw = 420, p = Math.round(b.ratio() * 100);
       c.textAlign = 'left'; c.font = '800 20px ' + F_UI; c.fillStyle = '#efe4cc'; c.fillText(OK.workName(wk), x0, yy);
+      { const nw = c.measureText(OK.workName(wk)).width; c.font = '800 15px ' + F_UI; c.fillStyle = '#d8c6a4'; c.fillText('総合' + sum(wk.st) + (wk.hw ? '・' + OK.repTitle(wk) : ''), x0 + nw + 10, yy + 1); }
       c.textAlign = 'right'; c.font = '400 26px ' + F_BIG; c.fillStyle = side === r.winner ? '#ffcf3a' : '#a89c90'; c.fillText(p + '%', x0 + bw, yy);
       c.fillStyle = 'rgba(255,255,255,.13)'; c.fillRect(x0, yy + 18, bw, 10);
       c.fillStyle = R.COL[side].f; c.fillRect(x0, yy + 18, bw * Math.max(0, Math.min(1, b.ratio())), 10);
@@ -130,9 +132,11 @@
       c.fillStyle = gg.gold ? '#ffcf3a' : 'rgba(255,255,255,.15)'; c.beginPath(); (c.roundRect ? c.roundRect(tx, ty, tw, 34, 17) : c.rect(tx, ty, tw, 34)); c.fill();
       c.fillStyle = gg.gold ? '#2a211b' : '#efe4cc'; c.fillText(gg.t, tx + 13, ty + 18); tx += tw + 9;
     }
-    c.fillStyle = 'rgba(255,255,255,.08)'; c.fillRect(0, H - 44, W, 44);
-    c.font = '800 18px ' + F_UI; c.fillStyle = '#d8c6a4'; c.textAlign = 'left'; c.fillText('#字力 #ブラウザゲーム', 24, H - 22);
-    c.textAlign = 'right'; c.fillText(o.url.replace('https://', '').replace(/\/$/, ''), W - 24, H - 22);
+    c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(0, H - 50, W, 50);
+    { const G = OK.grade(draw ? 0 : sum(w.st)), fg = c.createLinearGradient(0, 0, W, H); fg.addColorStop(0, G.a); fg.addColorStop(0.5, G.b); fg.addColorStop(1, G.a);
+      c.strokeStyle = fg; c.lineWidth = 8; c.beginPath(); if (c.roundRect) c.roundRect(10, 10, W - 20, H - 20, 22); else c.rect(10, 10, W - 20, H - 20); c.stroke(); }
+    c.font = '800 18px ' + F_UI; c.fillStyle = '#d8c6a4'; c.textAlign = 'left'; c.fillText('#字力 #ブラウザゲーム', 34, H - 30);
+    c.textAlign = 'right'; c.fillText(o.url.replace('https://', '').replace(/\/$/, ''), W - 34, H - 30);
   };
 
   // ---------- 字力カードの画像（書いた字・強さ・合言葉） ----------
