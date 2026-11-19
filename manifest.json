@@ -1,6 +1,6 @@
 {
- "name": "漢ノ字（オトコノジ）",
- "short_name": "漢ノ字",
+ "name": "字力",
+ "short_name": "字力",
  "start_url": "./",
  "display": "standalone",
  "background_color": "#16120f",
