@@ -277,6 +277,13 @@
     const f = tab[hi] > tab[lo] ? (v - tab[lo]) / (tab[hi] - tab[lo]) : 0;
     return Math.round((lo + f) / n * 100);
   }
+  // ---------- 字力の物差し（最大150） ----------
+  // 素質：順位（0〜100）を 10〜130 に。組み替えた作品は「70%の出来で書いた字」くらい、元の字のまま（手本）は 85%
+  SH.MAX = 150; SH.KUMI = 0.70; SH.ORIG = 0.85;
+  SH.scale = p => Math.round(10 + p * 1.2);
+  SH.scaled = p => { const o = {}; for (const k in p) o[k] = SH.scale(p[k]); return o; };
+  SH.finalOf = function (b, orig) { const p = SH.stats(b), k = orig ? SH.ORIG : SH.KUMI, o = {}; for (const key in p) o[key] = Math.max(1, Math.round(SH.scale(p[key]) * k)); return o; };
+  SH.total = st => ['hp', 'atk', 'def', 'shp', 'spd'].reduce((a, k) => a + (st[k] || 0), 0);
   SH.stats = function (b) {
     const P = OK.PCT || {};
     const ink = pct(P.ink, b.ink);
@@ -305,7 +312,7 @@
   const baseMemo = new Map();
   async function baseOf(form, ch, ref) {
     const k = form + ch; if (baseMemo.has(k)) return baseMemo.get(k);
-    const prep = SH.prep(ref), b = SH.build(prep, SH.original(prep), { full: true }), st = SH.stats(b);
+    const prep = SH.prep(ref), b = SH.build(prep, SH.original(prep), { full: true }), st = SH.scaled(SH.stats(b));
     const out = { st, b, prep }; baseMemo.set(k, out); return out;
   }
   SH.baseOf = baseOf;
@@ -335,7 +342,8 @@
     const prep = SH.prep(g.forms[w.form]);
     if (w.pls.length !== prep.length || new Set(w.pls.map(p => p.i)).size !== prep.length || w.pls.some(p => p.i < 0 || p.i >= prep.length)) throw new Error('画の数があいません');
     const b = SH.build(prep, w.pls, { full: true });
-    const out = { s, form: w.form, ch: w.ch, pls: w.pls, prep, b, st: SH.stats(b), orig: SH.isOriginal(prep, w.pls) };
+    const orig = SH.isOriginal(prep, w.pls);
+    const out = { s, form: w.form, ch: w.ch, pls: w.pls, prep, b, st: SH.finalOf(b, orig), orig };
     memo.set(s, out); if (memo.size > 60) memo.delete(memo.keys().next().value);
     return out;
   };

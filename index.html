@@ -45,7 +45,8 @@
     <div class="logo-r">じりき</div>
     <p class="sub">字をえらんで、<b>手本なしで自分の手で書け</b>。<br>きれいに書くほど字の力が出る。くせ字は、くせのまま戦う。</p>
     <div class="t-btns">
-      <button class="btn big hot" id="btn-make">字を書いて作る</button>
+      <button class="btn big hot" id="btn-write">字を書いて作る</button>
+      <button class="btn blue wide" id="btn-make">字をばらして組み替える</button>
       <div class="row t-row2">
         <button class="btn sm2" id="btn-practice">練習試合</button>
         <button class="btn sm2" id="btn-chal">挑戦状と戦う</button>
@@ -63,22 +64,63 @@
   </div>
 </section>
 
-<!-- 書く -->
+<!-- 作る -->
 <section class="screen" id="s-make">
   <header class="bar mk-bar">
     <button class="btn sm ghost" id="mk-back">←<span class="mk-bk"> もどる</span></button>
     <button class="mk-ch" id="mk-ch" title="字をかえる"><span id="mk-ch-t">？</span><small>字をかえる</small></button>
     <select class="cls" id="mk-form" aria-label="字形" hidden></select>
     <span class="mk-st" id="mk-st"></span>
+    <button class="btn sm ghost mk-help" id="mk-help" title="作り方">？</button>
+  </header>
+  <div class="mk-body">
+    <div class="mk-board">
+      <canvas id="mk-cv"></canvas>
+      <div class="mk-empty" id="mk-empty">
+        <p>ばらす字を1つ入れてください</p>
+        <div class="mk-q"><input id="mk-q" maxlength="8" autocomplete="off" autocapitalize="off" placeholder="例：木"><button class="btn hot" id="mk-go">ばらす</button></div>
+        <button class="btn sm" id="mk-rand">おまかせ</button>
+        <p class="note">漢字・ひらがな・カタカナ・英数字・ハングルが使えます。</p>
+      </div>
+    </div>
+    <div class="mk-side">
+      <div class="mk-tools" id="mk-tools">
+        <button class="btn sm" id="mk-rl" hidden title="左に15度回す">⟲<small>15°</small></button>
+        <button class="btn sm" id="mk-rr" hidden title="右に15度回す">⟳<small>15°</small></button>
+        <button class="btn sm" id="mk-out" title="えらんだ画を箱にもどす">箱へ</button>
+        <button class="btn sm" id="mk-undo" title="ひとつ前にもどす">↶</button>
+        <button class="btn sm" id="mk-reset" title="元の字の形にもどす">元の字</button>
+        <button class="btn sm" id="mk-clear" title="ぜんぶ箱にもどす">全部箱へ</button>
+      </div>
+      <p class="mk-savehint" id="mk-savehint">↓ できたら、いちばん下の<b>「この形で保存」</b>ボタンで保存</p>
+      <div class="mk-box-h"><b>素材箱</b><span id="mk-box-n"></span><small>書き順に並んでいます。ドラッグで台へ</small></div>
+      <div class="mk-box" id="mk-box"></div>
+      <div class="mk-stats" id="mk-stats" title="押すとグラフ">
+        <canvas id="mk-radar" width="300" height="270" style="width:150px;height:135px"></canvas>
+        <div class="st-list" id="mk-stl"></div>
+      </div>
+      <p class="mk-msg" id="mk-msg"></p>
+      <div class="mk-foot"><button class="btn big hot" id="mk-save" disabled>この形で保存</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 書く -->
+<section class="screen" id="s-write">
+  <header class="bar mk-bar">
+    <button class="btn sm ghost" id="wr-back">←<span class="mk-bk"> もどる</span></button>
+    <button class="mk-ch" id="wr-ch" title="字をかえる"><span id="wr-ch-t">？</span><small>字をかえる</small></button>
+    <select class="cls" id="wr-form" aria-label="字形" hidden></select>
+    <span class="wr-st" id="wr-st"></span>
   </header>
   <div class="wr-body">
     <p class="wr-q" id="wr-q">「？」を書いてください</p>
     <div class="wr-board" id="wr-board">
       <canvas id="wr-cv"></canvas>
-      <div class="mk-empty" id="mk-empty">
+      <div class="mk-empty" id="wr-empty">
         <p>書く字を1つえらんでください</p>
-        <div class="mk-q"><input id="mk-q" maxlength="8" autocomplete="off" autocapitalize="off" placeholder="例：永"><button class="btn hot" id="mk-go">この字を書く</button></div>
-        <button class="btn sm" id="mk-rand">おまかせ</button>
+        <div class="mk-q"><input id="wr-qin" maxlength="8" autocomplete="off" autocapitalize="off" placeholder="例：永"><button class="btn hot" id="wr-go">この字を書く</button></div>
+        <button class="btn sm" id="wr-rand">おまかせ</button>
         <p class="note">漢字・ひらがな・カタカナ・英数字・記号・ハングルが使えます。</p>
       </div>
     </div>
@@ -259,6 +301,7 @@
 <script src="js/qm.js?v=3"></script>
 <script src="js/chal.js?v=3"></script>
 <script src="js/judge.js?v=1"></script>
+<script src="js/edit.js?v=1"></script>
 <script src="js/write.js?v=1"></script>
 <script src="js/main.js?v=3"></script>
 </body>

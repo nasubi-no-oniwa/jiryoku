@@ -172,11 +172,11 @@
   };
   // 五角形のグラフ。base：[5]、add：{k:[ふつう,交付金]}
   R.radar = function (ctx, x, y, r, base, add, opt = {}) {
-    const ks = JM.STATS.map(s => s.k), n = 5, pt = (i, v) => { const a = -Math.PI / 2 + i / n * Math.PI * 2; return [x + Math.cos(a) * r * v / 100, y + Math.sin(a) * r * v / 100]; };
+    const ks = JM.STATS.map(s => s.k), n = 5, MX = 150, pt = (i, v) => { const a = -Math.PI / 2 + i / n * Math.PI * 2; return [x + Math.cos(a) * r * v / MX, y + Math.sin(a) * r * v / MX]; };
     ctx.save();
-    for (const lv of [25, 50, 75, 100]) { ctx.beginPath(); for (let i = 0; i < n; i++) { const [px, py] = pt(i, lv); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.closePath(); ctx.strokeStyle = opt.light ? (lv === 100 ? 'rgba(255,240,210,.5)' : 'rgba(255,240,210,.18)') : (lv === 100 ? 'rgba(60,40,20,.45)' : 'rgba(60,40,20,.15)'); ctx.lineWidth = 1; ctx.stroke(); }
-    for (let i = 0; i < n; i++) { const [px, py] = pt(i, 100); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(px, py); ctx.strokeStyle = 'rgba(60,40,20,.12)'; ctx.stroke(); }
-    const layer = (vals, fill, stroke) => { ctx.beginPath(); vals.forEach((v, i) => { const [px, py] = pt(i, Math.max(0, Math.min(110, v))); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1.6; ctx.stroke(); } };
+    for (const lv of [30, 60, 90, 120, 150]) { ctx.beginPath(); for (let i = 0; i < n; i++) { const [px, py] = pt(i, lv); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.closePath(); ctx.strokeStyle = opt.light ? (lv === 150 ? 'rgba(255,240,210,.5)' : 'rgba(255,240,210,.18)') : (lv === 150 ? 'rgba(60,40,20,.45)' : 'rgba(60,40,20,.15)'); ctx.lineWidth = 1; ctx.stroke(); }
+    for (let i = 0; i < n; i++) { const [px, py] = pt(i, 150); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(px, py); ctx.strokeStyle = 'rgba(60,40,20,.12)'; ctx.stroke(); }
+    const layer = (vals, fill, stroke) => { ctx.beginPath(); vals.forEach((v, i) => { const [px, py] = pt(i, Math.max(0, Math.min(150, v))); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1.6; ctx.stroke(); } };
     const a0 = add ? ks.map((k, i) => base[i] + Math.max(0, add[k][0])) : base;
     const a1 = add ? ks.map((k, i) => base[i] + Math.max(0, add[k][0]) + Math.max(0, add[k][1])) : base;
     const net = add ? ks.map((k, i) => base[i] + add[k][0] + add[k][1]) : base;
@@ -184,7 +184,7 @@
     layer(add ? ks.map((k, i) => Math.min(base[i], net[i])) : base, opt.fill || 'rgba(90,80,70,.45)', opt.stroke || 'rgba(60,40,20,.8)');
     if (opt.labels !== false) {
       ctx.fillStyle = opt.light ? '#efe4cc' : '#3a2a1c'; ctx.font = `800 ${opt.fs || 11}px "M PLUS Rounded 1c",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      JM.STATS.forEach((s, i) => { const [px, py] = pt(i, 128); ctx.fillText(s.n, px, py); });
+      JM.STATS.forEach((s, i) => { const [px, py] = pt(i, 190); ctx.fillText(s.n, px, py); });
     }
     ctx.restore();
   };

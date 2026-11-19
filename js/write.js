@@ -6,21 +6,21 @@
   const OK = window.OK, SH = OK.SH, GL = OK.GL, JD = OK.JD;
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const E = OK.E = {};
+  const E = OK.W = {};
   const LW = SH.HW * 2;   // 書く線の太さ（試合の形と同じ太さ。0〜1000 の箱で）
   const st = { ch: '', form: '', forms: [], ref: null, strokes: [], cur: null, t0: 0, size: 300, w: null };
 
   // ---------- ひらく ----------
   E.open = async function (work) {
-    OK.show('s-make');
+    OK.show('s-write');
     if (work && SH.isW(work)) { const d = SH.decodeW(work); if (d) { await setChar(d.ch, d.form); return; } }
     if (work && typeof work === 'object' && work.ch) { await setChar(work.ch, work.form); return; }
     if (st.ch) { resize(); draw(); return; }
     empty(true);
   };
   function empty(on) {
-    $('mk-empty').classList.toggle('on', on); $('mk-empty').hidden = !on;
-    if (on) { $('mk-ch-t').textContent = '？'; $('wr-q').textContent = '書く字をえらんでください'; $('mk-st').textContent = ''; setTimeout(() => $('mk-q').focus(), 50); }
+    $('wr-empty').classList.toggle('on', on); $('wr-empty').hidden = !on;
+    if (on) { $('wr-ch-t').textContent = '？'; $('wr-q').textContent = '書く字をえらんでください'; $('wr-st').textContent = ''; setTimeout(() => $('wr-qin').focus(), 50); }
     resize(); draw(); upd();
   }
   async function setChar(raw, form) {
@@ -29,15 +29,15 @@
     if (!g) { msg(`「${ch}」は画のデータがないので書けません。ほかの字にしてください`); return false; }
     st.forms = GL.formsOf(g); st.form = form && g.forms[form] ? form : st.forms[0];
     st.ch = ch; st.g = g; st.ref = g.forms[st.form]; st.strokes = []; st.cur = null; st.t0 = 0;
-    const sel = $('mk-form'); sel.innerHTML = st.forms.map(f => `<option value="${f}"${f === st.form ? ' selected' : ''}>${esc(GL.FORM[f])}</option>`).join(''); sel.hidden = st.forms.length < 2;
-    $('mk-ch-t').textContent = ch;
+    const sel = $('wr-form'); sel.innerHTML = st.forms.map(f => `<option value="${f}"${f === st.form ? ' selected' : ''}>${esc(GL.FORM[f])}</option>`).join(''); sel.hidden = st.forms.length < 2;
+    $('wr-ch-t').textContent = ch;
     $('wr-q').innerHTML = `「<b>${esc(ch)}</b>」を書いてください`;
     empty(false); msg(''); return true;
   }
-  function msg(t) { const e = $('mk-st'); if (t) { OK.toast(t); } }
+  function msg(t) { const e = $('wr-st'); if (t) { OK.toast(t); } }
   function upd() {
     const n = st.strokes.length, need = st.ref ? st.ref.length : 0;
-    $('mk-st').textContent = st.ch ? `${n}画／手本${need}画` : '';
+    $('wr-st').textContent = st.ch ? `${n}画／手本${need}画` : '';
     $('wr-done').disabled = !st.ch || n === 0;
     $('wr-undo').disabled = n === 0; $('wr-clear').disabled = n === 0;
   }
@@ -111,10 +111,10 @@
   E.autoName = () => NA[Math.floor(Math.random() * NA.length)] + NB[Math.floor(Math.random() * NB.length)];
   function showCard(w) {
     $('jc-rep').textContent = w.j.rep.toFixed(1) + '%';
-    $('jc-pow').textContent = '素質の ' + Math.round(w.jr.k * 100) + '% を出せる';
+    $('jc-pow').textContent = '素質の ' + Math.round(w.jr.k * 100) + '% を出せる・総合パワー ' + SH.total(w.st);
     const c = $('jc-shape').getContext('2d'); c.clearRect(0, 0, 300, 300); OK.R.shapeIcon(c, w.b.parts, 150, 150, 240, 0, 0, { lw: 3 });
     const rv = $('jc-radar').getContext('2d'); rv.clearRect(0, 0, 300, 270); rv.save(); rv.scale(2, 2); OK.R.radar(rv, 75, 70, 48, OK.STATS.map(x => w.base[x.k]), null, { fs: 10, fill: 'rgba(90,80,70,.15)', stroke: 'rgba(60,40,20,.35)' }); OK.R.radar(rv, 75, 70, 48, OK.STATS.map(x => w.st[x.k]), null, { fs: 10, labels: false, fill: 'rgba(217,69,46,.45)', stroke: 'rgba(122,26,16,.9)' }); rv.restore();
-    $('jc-stl').innerHTML = OK.STATS.map(x => { const a = w.base[x.k], b = w.st[x.k], d = b - a; return `<div><b>${x.n}</b><b>${b}<small class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : ''}${d}</small></b></div>`; }).join('');
+    $('jc-stl').innerHTML = OK.STATS.map(x => { const a = w.base[x.k], b = w.st[x.k], d = b - a; return `<div><b>${x.n}</b><b>${b}<small class="${d >= 0 ? 'up' : 'dn'}"> ${d >= 0 ? '+' : ''}${d}</small></b></div>`; }).join('') + `<div class="tot"><b>総合パワー</b><b>${SH.total(w.st)}<small> ／素質${SH.total(w.base)}</small></b></div>`;
     const j = w.j, why = w.jr.why.slice();
     why.unshift(`画数：${j.nu}画（手本${j.nr}画）${j.order === true ? '・書き順○' : j.order === false ? '・書き順×' : ''}`);
     $('jc-why').innerHTML = why.map(t => `<li>${esc(t)}</li>`).join('');
@@ -128,12 +128,12 @@
     cv = $('wr-cv');
     cv.addEventListener('pointerdown', down); cv.addEventListener('pointermove', move);
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-    $('mk-back').onclick = () => { OK.S && OK.S.play('ui'); OK.toTitle(); };
-    $('mk-ch').onclick = () => { st.ch = ''; st.ref = null; st.strokes = []; empty(true); };
-    $('mk-go').onclick = () => setChar($('mk-q').value);
-    $('mk-q').onkeydown = e => { if (e.key === 'Enter') setChar($('mk-q').value); };
-    $('mk-rand').onclick = () => setChar(OK.randomChar());
-    $('mk-form').onchange = () => setChar(st.ch, $('mk-form').value);
+    $('wr-back').onclick = () => { OK.S && OK.S.play('ui'); OK.toTitle(); };
+    $('wr-ch').onclick = () => { st.ch = ''; st.ref = null; st.strokes = []; empty(true); };
+    $('wr-go').onclick = () => setChar($('wr-qin').value);
+    $('wr-qin').onkeydown = e => { if (e.key === 'Enter') setChar($('wr-qin').value); };
+    $('wr-rand').onclick = () => setChar(OK.randomChar());
+    $('wr-form').onchange = () => setChar(st.ch, $('wr-form').value);
     $('wr-undo').onclick = () => { st.strokes.pop(); draw(); upd(); };
     $('wr-clear').onclick = () => { st.strokes = []; st.t0 = 0; draw(); upd(); };
     $('wr-done').onclick = done;
@@ -146,7 +146,7 @@
       OK.Works.add(st.w.s); OK.Works.setName && OK.Works.setName(st.w.s, nm);
       closeCard(); OK.practice(st.w.s);
     };
-    window.addEventListener('resize', () => { if (document.querySelector('#s-make.active')) { resize(); draw(); } });
+    window.addEventListener('resize', () => { if (document.querySelector('#s-write.active')) { resize(); draw(); } });
   }
   E.bind = bind;   // main.js の起動から呼ばれる
 })();

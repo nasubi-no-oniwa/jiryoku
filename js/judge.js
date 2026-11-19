@@ -159,32 +159,36 @@
   // 再現度がきびしめ：90%以上でほぼ全力、70%で 7割
   JD.power = rep => rep >= 90 ? 0.97 + (rep - 90) * 0.003 : Math.max(0.15, 0.97 - (90 - rep) * 0.0135);
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+  // くせは「配分だけ」を変える（上げたぶん、どこかを下げる。合計は 0）
+  // 合計を動かすのは、再現度（かけ算）・書き順・線のなめらかさ だけ
   JD.mods = function (j) {
     const m = { hp: 0, atk: 0, def: 0, shp: 0, spd: 0 }, why = [];
-    // 大きさ：大きく書くと重く（体力・勢い＋、速さ−）
+    const add = (o) => { for (const k in o) m[k] += o[k]; };
+    // 大きさ：大きく書くと重く（体力・攻撃＋、速さ−）
     const sz = clamp((j.size - 1) / 0.4, -1, 1);
-    if (Math.abs(sz) > 0.25) { m.hp += sz * 12; m.atk += sz * 8; m.spd -= sz * 14; why.push(sz > 0 ? '大きく書いた：体力・勢い↑ 速さ↓' : '小さく書いた：速さ↑ 体力・勢い↓'); }
-    // 傾き：右上がりで前のめり（勢い＋、かたさ−）
+    if (Math.abs(sz) > 0.25) { add({ hp: sz * 12, atk: sz * 10, spd: -sz * 22 }); why.push(sz > 0 ? '大きく書いた：体力・攻撃↑ 速さ↓' : '小さく書いた：速さ↑ 体力・攻撃↓'); }
+    // 傾き：右上がりで前のめり（攻撃＋、防御−）
     const tl = clamp(j.tilt / 12, -1, 1);
-    if (Math.abs(tl) > 0.15) { m.atk += tl * 12; m.def -= tl * 10; why.push(tl > 0 ? '右上がり：勢い↑ かたさ↓' : '右下がり：かたさ↑ 勢い↓'); }
-    // 上下のかたより：下に寄るとどっしり（かたさ＋、速さ−）
+    if (Math.abs(tl) > 0.15) { add({ atk: tl * 16, def: -tl * 16 }); why.push(tl > 0 ? '右上がり：攻撃↑ 防御↓' : '右下がり：防御↑ 攻撃↓'); }
+    // 上下のかたより：下に寄るとどっしり（防御＋、速さ−）
     const oy = clamp(j.offY / 15, -1, 1);
-    if (Math.abs(oy) > 0.15) { m.def += oy * 10; m.spd -= oy * 8; why.push(oy > 0 ? '下に寄った：どっしり（かたさ↑ 速さ↓）' : '上に寄った：身軽（速さ↑ かたさ↓）'); }
-    // なめらかさ：ガタガタの線は割れやすい
-    const wb = clamp((j.wob - 0.08) / 0.35, 0, 1);
-    if (wb > 0.15) { m.def -= wb * 15; why.push('線がガタガタ：かたさ↓'); } else { m.def += 4; why.push('線がなめらか：かたさ↑'); }
-    // 書く速さ：すばやいと速さ＋（線1000を 1.2秒で書けば＋、4秒以上かかると−）
+    if (Math.abs(oy) > 0.15) { add({ def: oy * 14, spd: -oy * 14 }); why.push(oy > 0 ? '下に寄った：どっしり（防御↑ 速さ↓）' : '上に寄った：身軽（速さ↑ 防御↓）'); }
+    // 書く速さ：すばやいと速さ＋、そのぶん体力−（線1000を 1.2秒で書けば＋、4秒以上かかると−）
     const sp = clamp((2.2 - j.secPer) / 1.6, -1, 1);
-    if (Math.abs(sp) > 0.1) { m.spd += sp * 14; why.push(sp > 0 ? 'すばやく書いた：速さ↑' : 'ゆっくり書いた：速さ↓'); }
-    // 書き順
-    if (j.order === true) { m.hp += 6; why.push('書き順が正しい：体力↑'); }
+    if (Math.abs(sp) > 0.1) { add({ spd: sp * 18, hp: -sp * 18 }); why.push(sp > 0 ? 'すばやく書いた：速さ↑ 体力↓' : 'じっくり書いた：体力↑ 速さ↓'); }
+    // ここから下は合計も動く
+    const wb = clamp((j.wob - 0.08) / 0.35, 0, 1);
+    if (wb > 0.15) { m.def -= Math.round(wb * 20); why.push('線がガタガタ：防御↓（総合↓）'); } else { m.def += 6; why.push('線がなめらか：防御↑（総合↑）'); }
+    if (j.order === true) { m.hp += 10; why.push('書き順が正しい：体力↑（総合↑）'); }
+    else if (j.order === false) why.push('書き順がちがう：ボーナスなし');
     // 左右のかたより：試合で押す力がそちらへ逃げる
     if (Math.abs(j.offX) > 2) why.push(j.offX > 0 ? '右に寄った：押すと体が回る' : '左に寄った：押すと体が回る');
+    for (const k in m) m[k] = Math.round(m[k]);
     return { m, why };
   };
   JD.stats = function (base, j) {
     const k = JD.power(j.rep), { m, why } = JD.mods(j), st = {};
-    for (const key of ['hp', 'atk', 'def', 'shp', 'spd']) st[key] = Math.round(clamp(base[key] * k + m[key], 0, 110));
+    for (const key of ['hp', 'atk', 'def', 'shp', 'spd']) st[key] = Math.round(clamp(base[key] * k + m[key], 1, 150));
     return { st, k, m, why };
   };
   // 試合で使う、左右のかたより（-1〜1）

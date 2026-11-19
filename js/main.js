@@ -17,9 +17,9 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
   const S = () => OK.S || { play() {}, bgm() {} };
   OK.QM = window.QM;
   OK.STATS = [
-    { k: 'hp', n: '体力', from: '線の広さ' },
-    { k: 'atk', n: '勢い', from: '画数' },
-    { k: 'def', n: 'かたさ', from: 'すき間の少なさ' },
+    { k: 'hp', n: '体力', from: '線の量' },
+    { k: 'atk', n: '攻撃', from: '画数' },
+    { k: 'def', n: '防御', from: 'すき間の少なさ' },
     { k: 'shp', n: '鋭さ', from: '出っぱり' },
     { k: 'spd', n: '速さ', from: '軽さ' },
   ];
@@ -74,6 +74,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
       </div>
       <div class="sl-mid"><canvas width="300" height="270" style="width:150px;height:135px" data-radar="${i}"></canvas><div class="st-list">`;
     for (const x of OK.STATS) h += `<div><b>${x.n} <span>${x.from}</span></b><b>${w.st[x.k]}</b></div>`;
+    h += `<div class="tot"><b>総合パワー</b><b>${SH.total(w.st)}</b></div>`;
     h += `</div></div>`;
     if (ed) {
       if (i === 0 || st.mode !== 'local') h += `<div class="sl-btns"><button class="btn sm" data-wpick="${i}">べつの作品</button>${st.mode === 'local' ? '<button class="btn sm" data-make="1">作る</button>' : ''}</div>`;
@@ -182,7 +183,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
         const a = ev.target.closest('button'); if (!a) return; S().play('ui');
         const act = a.dataset.a;
         if (act === 'pr') OK.practice(e.s);
-        else if (act === 'ed') OK.E.open(e.s);
+        else if (act === 'ed') (SH.isW(e.s) ? OK.W : OK.E).open(e.s);
         else if (act === 'ch') OK.Chal.put(e.s);
         else if (act === 'cd') OK.Chal.showCode(e.s, e.code);
         else if (act === 'vs') OK.Chal.get(e.code).then(c => c ? OK.Chal.start(c) : toast('見つかりませんでした')).catch(() => toast('読みこめませんでした'));
@@ -388,6 +389,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
   // ---------- ボタン ----------
   function bind() {
     $('btn-make').onclick = () => { S().unlock(); S().play('ui'); OK.E.open(); };
+    $('btn-write').onclick = () => { S().unlock(); S().play('ui'); OK.W.open(); };
     $('btn-practice').onclick = () => { S().unlock(); S().play('ui'); OK.practice(); };
     $('btn-chal').onclick = () => { S().unlock(); S().play('ui'); if (!OK.hasDb()) { toast('通信の準備がまだです'); return; } $('ch-err').textContent = ''; show('s-chal'); };
     $('ch-go').onclick = () => { S().play('ui'); OK.Chal.byCode($('ch-code').value); };
@@ -406,7 +408,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
       S().play('ui');
       if (t.dataset.wpick != null) openWorkPick(+t.dataset.wpick);
       else if (t.dataset.cpick != null) { $('cp-err').textContent = ''; $('cp-q').value = ''; $('cpick').classList.add('on'); setTimeout(() => { try { $('cp-q').focus(); } catch (e) {} }, 60); }
-      else if (t.dataset.make != null) OK.E.open();
+      else if (t.dataset.make != null) OK.W.open();
     });
     $('wp-close').onclick = () => $('wpick').classList.remove('on');
     $('cp-close').onclick = () => $('cpick').classList.remove('on');
@@ -425,7 +427,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
     $('imgview').onclick = ev => { if (ev.target.id === 'imgview') $('imgview').classList.remove('on'); };
     $('btn-replay').onclick = () => { S().play('ui'); startBattle(); };
     $('btn-change').onclick = () => { S().play('ui'); $('result').classList.remove('on'); if (st.mode === 'watch') { toTitle(); return; } if (st.mode !== 'local' && OK.Net) OK.Net.again(); openSetup(); };
-    $('btn-remake').onclick = () => { S().play('ui'); $('result').classList.remove('on'); OK.E.open(st.slots[0].w.s); };
+    $('btn-remake').onclick = () => { S().play('ui'); $('result').classList.remove('on'); (SH.isW(st.slots[0].w.s) ? OK.W : OK.E).open(st.slots[0].w.s); };
     $('btn-chal-next').onclick = () => { S().play('ui'); $('result').classList.remove('on'); OK.Chal.random(); };
     $('btn-online').onclick = () => { S().unlock(); S().play('ui'); if (!OK.hasDb()) { toast('通信の準備がまだです'); return; } $('in-code').value = store.get('ok_room_v', '') || ''; $('on-form').classList.remove('hide'); $('on-wait').classList.add('hide'); $('on-err').textContent = ''; show('s-online'); };
     $('btn-on-back').onclick = () => { S().play('ui'); if (OK.Net) OK.Net.leave(); toTitle(); };
@@ -445,7 +447,7 @@ function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.te
   }
   async function boot() {
     R.init($('arena'));
-    bind(); OK.E.bind(); setupQM();
+    bind(); OK.E.bind(); OK.W.bind(); setupQM();
     $('snd-name').textContent = OK.mute() ? 'なし' : 'あり';
     requestAnimationFrame(frame);
     try {
